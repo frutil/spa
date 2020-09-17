@@ -1,4 +1,5 @@
 (ns frutil.spa.state
+  (:require-macros [frutil.spa.state])
   (:require
    [reagent.core :as r]))
 
@@ -11,12 +12,21 @@
 (defonce SHELVES (r/atom {}))
 
 
+(declare value)
+
+
 (defn reg-shelve [options]
+  (js/console.log "reg-shelve:" options)
   (let [id (get options :id)
         shelve (assoc options
                       :BOXES (r/atom {}))]
     (swap! SHELVES assoc id shelve)
-    shelve))
+    ^{::shelve shelve}
+    (partial value shelve)))
+
+
+(defn shelve [state-fn]
+  (-> state-fn meta ::shelve))
 
 
 (defn- new-box [item-id]
