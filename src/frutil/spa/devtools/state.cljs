@@ -38,6 +38,9 @@
 (defn Panel []
   (let [shelves (vals @state/SHELVES)]
     [:div
+     {:style {:display :flex
+              :flex-direction :column
+              :gap "1rem"}}
      (for [shelve (->> shelves (sort-by :id))]
        ^{:key (-> shelve :id)}
        [ui/Card

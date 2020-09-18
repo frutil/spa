@@ -21,8 +21,9 @@
         shelve (assoc options
                       :BOXES (r/atom {}))]
     (swap! SHELVES assoc id shelve)
-    ^{::shelve shelve}
-    (partial value shelve)))
+    (with-meta
+      (partial value shelve)
+      {::shelve shelve})))
 
 
 (defn shelve [state-fn]
@@ -94,8 +95,9 @@
     @STATUS))
 
 
-(defn set! [shelve item-id value etag]
-  (let [timestamp (timestamp)
+(defn set! [state-fn item-id value etag]
+  (let [shelve (shelve state-fn)
+        timestamp (timestamp)
         box (box shelve item-id)
         STATUS (get box :STATUS)
         VALUE (get box :VALUE)]
@@ -106,4 +108,10 @@
     (when-let [save (get shelve :save-f)]
       (save shelve item-id value etag)
       (swap! STATUS assoc :saved timestamp)))
-  shelve)
+  nil)
+
+
+(defn clear-all! [state-fn]
+  (let [shelve (shelve state-fn)
+        BOXES (get shelve :BOXES)]
+    (reset! BOXES {})))
