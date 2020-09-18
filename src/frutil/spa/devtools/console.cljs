@@ -38,11 +38,13 @@
 
 (defn Console []
   [:div
-   {:style {:position :fixed
-            :bottom 0
-            :width "100%"
-            :height "300px"
-            :background-color "#DDD"
-            :border-top "1px solid black"
-            :overflow :auto}}
-   [Panels]])
+   {:style {:height "300px"}}
+   [:div
+    {:style {:position :fixed
+             :bottom 0
+             :width "100%"
+             :height "300px"
+             :background-color "#DDD"
+             :border-top "1px solid black"
+             :overflow :auto}}
+    [Panels]]])

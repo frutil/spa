@@ -1,8 +1,11 @@
 {:deps {
         reagent                     {:mvn/version "1.0.0-alpha2"}
+
         arttuka/reagent-material-ui {:mvn/version "4.11.0-1"}
+
         cljs-ajax                   {:mvn/version "0.7.5"}
-        metosin/reitit            {:mvn/version "0.5.5"}
-        metosin/reitit-dev        {:mvn/version "0.5.5"}}
+
+        metosin/reitit              {:mvn/version "0.5.5"}
+        metosin/reitit-dev          {:mvn/version "0.5.5"}}
 
  :paths ["src"]}
