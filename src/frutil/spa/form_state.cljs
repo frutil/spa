@@ -21,15 +21,17 @@
 
 
 (defn validate-field [field]
-  (assoc
-   field :error
-   (reduce (fn [error validator]
-             (if error
-               error
-               (validator field)))
-           nil
-           (into [validate-required]
-                 (-> field :validators)))))
+  (if-not (-> field :touched?)
+    field
+    (assoc
+     field :error
+     (reduce (fn [error validator]
+               (if error
+                 error
+                 (validator field)))
+             nil
+             (into [validate-required]
+                   (-> field :validators))))))
 
 
 (defn validate-fields [form]
@@ -43,7 +45,19 @@
       validate-fields))
 
 
-(defn on-field-blur [form id]
+(defn on-field-blur [form field-id]
   (-> form
-      (assoc-in [:fields id :touched?] true)
-      (update-in [:fields id] validate-field)))
+      (assoc-in [:fields field-id :touched?] true)
+      validate-form))
+
+
+(defn touch-all-fields [form]
+  (reduce (fn [form field-id]
+            (assoc-in form [:fields field-id :touched?] true))
+          form (-> form :fields keys)))
+
+
+(defn on-submit [form callback]
+  (-> form
+      touch-all-fields
+      validate-form))
