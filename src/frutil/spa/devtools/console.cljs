@@ -1,10 +1,12 @@
 (ns frutil.spa.devtools.console
   (:require
+   [frutil.spa.devtools.spy :as spy]
    [frutil.spa.devtools.state :as state]))
 
 
 (def panels
-  [(state/panel)])
+  [(spy/panel)
+   (state/panel)])
 
 
 (defn PanelActivationButton [panel]
@@ -32,7 +34,9 @@
    [:div
     (for [panel panels]
       ^{:key (-> panel :id)}
-      [Panel panel])]
+      [:div
+       [Panel panel]
+       [:br] [:hr] [:br]])]
    [:br]])
 
 

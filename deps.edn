@@ -1,4 +1,6 @@
 {:deps {
+        frutil/frutil               {:local/root "../frutil"}
+
         reagent                     {:mvn/version "1.0.0-alpha2"}
 
         arttuka/reagent-material-ui {:mvn/version "4.11.0-1"}
