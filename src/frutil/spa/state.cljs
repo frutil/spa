@@ -95,8 +95,9 @@
     @STATUS))
 
 
-(defn set! [state-fn item-id value etag]
-  (let [shelve (shelve state-fn)
+(defn update! [state-fn item-id update-fn & args]
+  (let [etag nil ;FIXME
+        shelve (shelve state-fn)
         timestamp (timestamp)
         box (box shelve item-id)
         STATUS (get box :STATUS)
@@ -104,11 +105,16 @@
     (swap! STATUS #(assoc %
                           :set timestamp
                           :etag etag))
-    (reset! VALUE value)
+    (swap! VALUE #(apply update-fn % args))
     (when-let [save (get shelve :save-f)]
       (save shelve item-id value etag)
       (swap! STATUS assoc :saved timestamp)))
   nil)
+
+
+(defn set! [state-fn item-id value etag]
+  ;; FIXME etag
+  (update! state-fn item-id (fn [_old-value] value)))
 
 
 (defn clear-all! [state-fn]

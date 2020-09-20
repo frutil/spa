@@ -4,8 +4,10 @@
    [frutil.spa.devtools.state :as state]))
 
 
+
 (def panels
-  [(spy/panel)
+  [
+   (spy/panel)
    (state/panel)])
 
 

@@ -17,8 +17,6 @@
     (fn [options & children]
       (let [form-state @FORM_STATE]
         [:form
-         [mui/Data form-state]
-         [:hr]
          (into
           [:div]
           (map (fn [child]
@@ -26,7 +24,9 @@
                    (let [field (get-in form-state [:fields child])]
                      (create-field (assoc field :FORM_STATE FORM_STATE)))
                    child))
-               children))]))))
+               children))
+         [:hr]
+         [mui/Data form-state]]))))
          ;; (for [field (-> options :fields)]
          ;;   ^{:key (-> field :id)}
          ;;   (form-field (assoc field :FORM_STATE FORM_STATE)))]))))
