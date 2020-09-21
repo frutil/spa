@@ -115,7 +115,8 @@
                   :font-style :italic}}
          "causes"]])
      [:div
-      {:style {:font-weight :bold}}
+      {:style {:font-weight :bold
+               :letter-spacing "1px"}}
       (str message)]
      [StackTrace stack]
      (when-not (empty? data)

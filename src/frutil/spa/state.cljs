@@ -23,9 +23,11 @@
 
 
 (defn- save-to-localstorage [shelve item-id value etag]
-  (js/console.log "SAVE:" value)
-  (localstorage/set-item [:state :value (get shelve :id) item-id] value)
-  (localstorage/set-item [:state :etag (get shelve :id) item-id] etag))
+  (let [serialize (get shelve :localstorage-save-transform-f identity)
+        value (serialize value)]
+    (js/console.log "SAVE:" value)
+    (localstorage/set-item [:state :value (get shelve :id) item-id] value)
+    (localstorage/set-item [:state :etag (get shelve :id) item-id] etag)))
 
 
 (defn- initialize-load-save [shelve]
