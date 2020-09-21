@@ -1,5 +1,6 @@
 (ns frutil.spa.mui
   (:require
+   [clojure.string :as str]
    [cljs.pprint :as pprint]
 
    [reagent.core :as r]
@@ -7,22 +8,30 @@
 
    [reagent-material-ui.core.css-baseline :refer [css-baseline]]
    [reagent-material-ui.styles :as styles]
+   [reagent-material-ui.core.typography :refer [typography]]
    [reagent-material-ui.core.grid :refer [grid]]
    [reagent-material-ui.core.card :refer [card]]
    [reagent-material-ui.core.card-content :refer [card-content]]))
 
 
-;;; JSS
+;;; JSS and Theme
 
 (defn styled-component [styles component]
   (let [component-styles (fn [theme]
                            {:style (styles theme)})
         with-custom-styles (styles/with-styles component-styles)
         StyledComponent (fn [{:keys [classes] :as _props}]
-                          [:div
+                          [:div.StyledComponentWrapper
                            {:class (:style classes)}
                            component])]
     [(with-custom-styles StyledComponent)]))
+
+
+(defonce THEME (r/atom nil))
+
+
+(defn theme [& path]
+  (get-in @THEME path))
 
 
 ;;;
@@ -44,7 +53,34 @@
                "!!! ERROR !!! pprint failed for data"))])
         datas)))
 
+;;; typography
+
+(defn Caption [& texts]
+  [typography
+   {:variant :caption}
+   (str/join " " texts)])
+
+
 ;;; layouts
+
+
+(defn Desktop--Header-Content-Footer [header content footer]
+  [:div.Desktop--Header-Content-Footer
+   {:style {:height "100vh"
+            :display :flex
+            :flex-direction :column}}
+   [:header
+    {:style {:z-index 2}}
+    header]
+   [:div
+    {:style {:height "100%"
+             :overflow :auto
+             :z-index 1
+             :background-color (theme :palette :background :default)}}
+    content]
+   [:footer
+    footer]])
+
 
 (defn Stack [options & components]
   (into
@@ -94,6 +130,8 @@
 ;;; app
 
 
+
+
 (defn app [custom-theme custom-styles Content]
   [:<> ; fragment
    [css-baseline]
@@ -102,5 +140,10 @@
 
 
 (defn mount-app [custom-theme custom-styles Content]
-  (rdom/render (app custom-theme custom-styles Content)
-               (js/document.getElementById "app")))
+  (let [custom-styles-wrapper
+        (fn [theme]
+          (reset! THEME theme)
+          (js/console.log "MUI Theme:", theme)
+          (custom-styles theme))]
+    (rdom/render (app custom-theme custom-styles-wrapper Content)
+                 (js/document.getElementById "app"))))
