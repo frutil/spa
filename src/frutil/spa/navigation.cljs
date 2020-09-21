@@ -19,6 +19,14 @@
   @MATCH)
 
 
+(defn params []
+  (get @MATCH :path-params))
+
+
+(defn param [k]
+  (get-in @MATCH [:path-params k]))
+
+
 (defn Switcher [component-key]
   [:div.Switcher
    {:class (str "Switcher--" component-key)}
