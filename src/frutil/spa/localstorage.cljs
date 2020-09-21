@@ -8,10 +8,15 @@
 
 
 (defn get-item [k]
-  (-> js/window
-      .-localStorage
-      (.getItem (encode-key k))
-      u/decode-edn))
+  (try
+    (-> js/window
+        .-localStorage
+        (.getItem (encode-key k))
+        u/decode-edn)
+    (catch :default ex
+      (throw (ex-info "frutil.spa.localstorage/get-item failed"
+                      {:key k}
+                      ex)))))
 
 
 (defn set-item [k v]

@@ -4,7 +4,9 @@
 
    [reitit.frontend :as rf]
    [reitit.frontend.easy :as rfe]
-   [reitit.coercion.spec :as rss]))
+   [reitit.coercion.spec :as rss]
+
+   [frutil.spa.mui :as mui]))
 
 
 (def href rfe/href)
@@ -32,7 +34,8 @@
    {:class (str "Switcher--" component-key)}
    (when-let [match @MATCH]
      (when-let [component (get-in match [:data component-key])]
-       [component match]))])
+       [mui/ErrorBoundary
+        [component match]]))])
 
 
 (defn initialize! [routes]

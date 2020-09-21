@@ -114,9 +114,6 @@
                   :color :lightgrey
                   :font-style :italic}}
          "causes"]])
-     ;; [:> mui/Card
-     ;;  (js/console.log exception)
-     ;;  [Data (-> exception)]]
      [:div
       {:style {:font-weight :bold}}
       (str message)]
@@ -138,7 +135,7 @@
     [:div
      {:style {:display :flex
               :overflow-x :auto}}
-     [:> bug-report
+     [bug-report
       {:style {:margin-right "1rem"}}]
      (into [:div] contents)]]])
 
@@ -182,8 +179,6 @@
                             comp))}))))
 
 
-
-
 ;;; typography
 
 (defn Caption [& texts]
@@ -202,15 +197,15 @@
             :flex-direction :column}}
    [:header
     {:style {:z-index 2}}
-    header]
+    [ErrorBoundary header]]
    [:div
     {:style {:height "100%"
              :overflow :auto
              :z-index 1
              :background-color (theme :palette :background :default)}}
-    content]
+    [ErrorBoundary content]]
    [:footer
-    footer]])
+    [ErrorBoundary footer]]])
 
 
 (defn Stack [options & components]
@@ -260,7 +255,10 @@
 
 ;;; app
 
-
+(defn ErrorThrower []
+  (throw (ex-info "Houston, we have a problem!"
+                  {:problem "test error"}
+                  (js/Error. "Some Dummy JavaScript Error."))))
 
 
 (defn app [custom-theme custom-styles Content]
@@ -270,11 +268,17 @@
     (styled-component custom-styles [Content])]])
 
 
+
+
+(defn App [root-component]
+  [ErrorBoundary
+   root-component])
+
 (defn mount-app [custom-theme custom-styles Content]
   (let [custom-styles-wrapper
         (fn [theme]
           (reset! THEME theme)
           (js/console.log "MUI Theme:", theme)
           (custom-styles theme))]
-    (rdom/render (app custom-theme custom-styles-wrapper Content)
+    (rdom/render [App (app custom-theme custom-styles-wrapper Content)]
                  (js/document.getElementById "app"))))
