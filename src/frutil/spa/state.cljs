@@ -1,7 +1,9 @@
 (ns frutil.spa.state
   (:require-macros [frutil.spa.state])
   (:require
-   [reagent.core :as r]))
+   [reagent.core :as r]
+
+   [frutil.spa.localstorage :as localstorage]))
 
 
 (defn timestamp []
@@ -15,11 +17,34 @@
 (declare value)
 
 
+(defn- load-from-localstorage [shelve item-id]
+  [(localstorage/get-item [:state :value (get shelve :id) item-id])
+   (localstorage/get-item [:state :etag (get shelve :id) item-id])])
+
+
+(defn- save-to-localstorage [shelve item-id value etag]
+  (js/console.log "SAVE:" value)
+  (localstorage/set-item [:state :value (get shelve :id) item-id] value)
+  (localstorage/set-item [:state :etag (get shelve :id) item-id] etag))
+
+
+(defn- initialize-load-save [shelve]
+  (if (or (get shelve :load-f)
+          (get shelve :save-f))
+    shelve
+    (if-not (get shelve :localstorage?)
+      shelve
+      (assoc shelve
+             :load-f load-from-localstorage
+             :save-f save-to-localstorage))))
+
+
 (defn reg-shelve [options]
   (js/console.log "reg-shelve:" options)
   (let [id (get options :id)
         shelve (assoc options
-                      :BOXES (r/atom {}))]
+                      :BOXES (r/atom {}))
+        shelve (initialize-load-save shelve)]
     (swap! SHELVES assoc id shelve)
     (with-meta
       (partial value shelve)
@@ -107,7 +132,7 @@
                           :etag etag))
     (swap! VALUE #(apply update-fn % args))
     (when-let [save (get shelve :save-f)]
-      (save shelve item-id value etag)
+      (save shelve item-id @VALUE etag)
       (swap! STATUS assoc :saved timestamp)))
   nil)
 
