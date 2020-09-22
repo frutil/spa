@@ -1,5 +1,5 @@
 (ns frutil.spa.state
-  (:require-macros [frutil.spa.state])
+  (:require-macros [frutil.spa.macros])
   (:require
    [reagent.core :as r]
 
@@ -148,3 +148,6 @@
   (let [shelve (shelve state-fn)
         BOXES (get shelve :BOXES)]
     (reset! BOXES {})))
+
+
+;;; pointers
