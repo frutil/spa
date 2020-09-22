@@ -3,7 +3,8 @@
   (:require
    [reagent.core :as r]
 
-   [frutil.spa.localstorage :as localstorage]))
+   [frutil.spa.localstorage :as localstorage]
+   [frutil.spa.navigation :as navigation]))
 
 
 (defn timestamp []
@@ -151,3 +152,13 @@
 
 
 ;;; pointers
+
+
+(defn new-pointer [state-fn resolve-key-fn]
+  (fn []
+    (let [k (resolve-key-fn)]
+      (state-fn k))))
+
+
+(defn new-navigation-param-pointer [state-fn param]
+  (new-pointer state-fn #(navigation/param param)))
