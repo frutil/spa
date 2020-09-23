@@ -1,4 +1,4 @@
-(ns frutil.spa.state-macros)
+(ns frutil.spa.state)
 
 
 (defmacro def-state

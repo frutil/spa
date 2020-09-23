@@ -1,5 +1,5 @@
 (ns frutil.spa.state
-  (:require-macros [frutil.spa.macros])
+  (:require-macros [frutil.spa.state])
   (:require
    [reagent.core :as r]
 
@@ -19,16 +19,16 @@
 
 
 (defn- load-from-localstorage [shelve item-id]
-  [(localstorage/get-item [:state :value (get shelve :id) item-id])
-   (localstorage/get-item [:state :etag (get shelve :id) item-id])])
+  [(localstorage/get-item [:state :value (get shelve :ident) item-id])
+   (localstorage/get-item [:state :etag (get shelve :ident) item-id])])
 
 
 (defn- save-to-localstorage [shelve item-id value etag]
   (let [serialize (get shelve :localstorage-save-transform-f identity)
         value (serialize value)]
     (js/console.log "SAVE:" value)
-    (localstorage/set-item [:state :value (get shelve :id) item-id] value)
-    (localstorage/set-item [:state :etag (get shelve :id) item-id] etag)))
+    (localstorage/set-item [:state :value (get shelve :ident) item-id] value)
+    (localstorage/set-item [:state :etag (get shelve :ident) item-id] etag)))
 
 
 (defn- initialize-load-save [shelve]
@@ -46,6 +46,7 @@
   (js/console.log "reg-shelve:" options)
   (let [id (get options :id)
         shelve (assoc options
+                      :ident (get options :ident id)
                       :BOXES (r/atom {}))
         shelve (initialize-load-save shelve)]
     (swap! SHELVES assoc id shelve)
