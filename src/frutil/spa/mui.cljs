@@ -12,6 +12,7 @@
    [reagent-material-ui.core.grid :refer [grid]]
    [reagent-material-ui.core.card :refer [card]]
    [reagent-material-ui.core.card-content :refer [card-content]]
+   [reagent-material-ui.components :as muic]
 
    [reagent-material-ui.icons.bug-report :refer [bug-report]]))
 
@@ -252,6 +253,33 @@
 
 (defn show-dialog [dialog]
   (reset! ACTIVE_DIALOG dialog))
+
+
+(defn InfoDialog
+  [{:keys [title]} children dispose]
+  [muic/dialog
+   {:open true
+    :on-close dispose}
+   (when title
+     [muic/dialog-title title])
+   [muic/dialog-content
+    children]
+   [muic/dialog-actions
+    [muic/button
+     {:color :primary
+      :on-click dispose}
+     "Ok"]]])
+
+
+(defn ExceptionDialog [ex dispose]
+  [InfoDialog
+   {}
+   [Exception ex]
+   dispose])
+
+
+(defn show-exception-dialog [ex]
+  (show-dialog [ExceptionDialog ex]))
 
 
 ;;; app
