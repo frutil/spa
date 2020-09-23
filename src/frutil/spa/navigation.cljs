@@ -22,11 +22,11 @@
 
 
 (defn params []
-  (get @MATCH :path-params))
+  (get-in @MATCH [:parameters :path]))
 
 
 (defn param [k]
-  (get-in @MATCH [:path-params k]))
+  (get-in @MATCH [:parameters :path k]))
 
 
 (defn Switcher [component-key]
@@ -41,6 +41,7 @@
 (defn initialize! [routes]
   (rfe/start!
    (rf/router routes {:data {:coercion rss/coercion}})
-   (fn [m] (reset! MATCH m))
+   (fn [match _history]
+     (reset! MATCH match))
    ;; set to false to enable HistoryAPI
    {:use-fragment true}))
