@@ -281,6 +281,8 @@
 (defn show-exception-dialog [ex]
   (show-dialog [ExceptionDialog ex]))
 
+(defn show-error-dialog [message]
+  (show-dialog [InfoDialog {:title "Error"} message]))
 
 ;;; app
 

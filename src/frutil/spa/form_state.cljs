@@ -1,15 +1,17 @@
 (ns frutil.spa.form-state)
 
 
-(defn- assoc-ids-to-fields [form]
-  (reduce (fn [form id]
-            (assoc-in form [:field id :id] id))
-          form (-> form :fields keys)))
+(defn new-form [options fields]
+  (reduce (fn [form field]
+            (let [id (get field :id)]
+              (-> form
+                  (assoc-in [:fields id] field)
+                  (update :fields-order #(conj (or % []) id)))))
+          options fields))
 
 
-(defn new-form-state [options]
-  (-> options
-      assoc-ids-to-fields))
+(defn fields-in-order [form]
+  (mapv #(get-in form [:fields %]) (-> form :fields-order)))
 
 
 (defn- validate-required [field]
@@ -42,7 +44,8 @@
 
 (defn validate-form [form]
   (-> form
-      validate-fields))
+      validate-fields
+      (assoc :validated? true)))
 
 
 (defn on-field-blur [form field-id]
@@ -57,7 +60,16 @@
           form (-> form :fields keys)))
 
 
-(defn on-submit [form callback]
-  (-> form
-      touch-all-fields
-      validate-form))
+(defn valid? [form]
+  (reduce (fn [valid field]
+            (and valid
+                 (-> field :error not)))
+          true (-> form :fields)))
+
+
+(defn on-submit [form]
+  (let [form (-> form
+                 (assoc :submitted? true)
+                 touch-all-fields
+                 validate-form)]
+    form))

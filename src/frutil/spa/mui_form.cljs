@@ -2,7 +2,7 @@
   (:require
    [reagent.core :as r]
 
-   [reagent-material-ui.core.text-field :refer [text-field]]
+   [reagent-material-ui.components :as muic]
 
    [frutil.spa.form-state :as form-state]
    [frutil.spa.mui :as mui]))
@@ -11,25 +11,65 @@
 (defmulti create-field (fn [field-options] (get field-options :field-type)))
 
 (defn Form
-  [options & children]
-  (let [FORM_STATE (r/atom (form-state/new-form-state
-                            (-> options :state)))]
-    (fn [options & children]
-      (let [form-state @FORM_STATE]
+  [form]
+  (let [FORM_STATE (r/atom form)
+        on-submit (fn []
+                    (swap! FORM_STATE form-state/on-submit)
+                    (let [form @FORM_STATE]
+                      (when (form-state/valid? form)
+                        ((get form :on-submit) form)))
+                    false)]
+    (fn [_form]
+      (let [form @FORM_STATE]
         [:form
-         (into
-          [:div]
-          (map (fn [child]
-                 (if (keyword? child)
-                   (let [field (get-in form-state [:fields child])]
-                     (create-field (assoc field :FORM_STATE FORM_STATE)))
-                   child))
-               children))
-         [:hr]
-         [mui/Data form-state]]))))
-         ;; (for [field (-> options :fields)]
-         ;;   ^{:key (-> field :id)}
-         ;;   (form-field (assoc field :FORM_STATE FORM_STATE)))]))))
+         {:on-submit (fn [event]
+                       (on-submit)
+                       (-> event .preventDefault))}
+         (for [field (form-state/fields-in-order form)]
+           ^{:key (get field :id)}
+           [:div
+            (create-field (assoc field :FORM_STATE FORM_STATE))])
+         [:div
+          {:style {:display :flex
+                   :justify-content :flex-end
+                   :gap "8px"
+                   :padding-top "8px"}}
+          [muic/button
+           {:color :primary
+            :on-click #(when-let [on-cancel (get form :on-cancel)]
+                         (on-cancel form))}
+           "Cancel"]
+          [muic/button
+           {:color :secondary
+            :variant :contained
+            :on-click on-submit}
+           "Submit"]]]))))
+         ;; [:hr]
+         ;; [mui/Data form]]))))
+
+
+(defn FormDialog
+  [form dispose]
+  (let [real-on-submit (get form :on-submit)
+        _ (when-not real-on-submit (throw (ex-info "missing :on-submit"
+                                                   {:form form})))
+        on-submit (fn [form]
+                    (dispose)
+                    (real-on-submit form))
+        form (assoc form
+                    :on-submit on-submit
+                    :on-cancel dispose)]
+    [muic/dialog
+     {:open true
+      :on-close dispose}
+     [muic/dialog-content
+      [Form form]]]))
+
+
+
+(defn show-form-dialog [options & fields]
+  (mui/show-dialog
+   [FormDialog (form-state/new-form options fields)]))
 
 
 (defn TextField
@@ -39,8 +79,9 @@
         helper-text (if error
                       error
                       (get options :helper-text))]
-    [text-field
+    [muic/text-field
      {:name id
+      :default-value (get-in @FORM_STATE [:fields id :value])
       :label (or (get options :label) (str id))
       :helper-text helper-text
       :auto-focus (get options :auto-focus?)
