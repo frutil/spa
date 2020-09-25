@@ -25,10 +25,13 @@
          {:on-submit (fn [event]
                        (on-submit)
                        (-> event .preventDefault))}
-         (for [field (form-state/fields-in-order form)]
+         (for [[index field] (map-indexed (fn [index field] [index field])
+                                          (form-state/fields-in-order form))]
            ^{:key (get field :id)}
            [:div
-            (create-field (assoc field :FORM_STATE FORM_STATE))])
+            (create-field (assoc field
+                                 :auto-focus? (= 0 index)
+                                 :FORM_STATE FORM_STATE))])
          [:div
           {:style {:display :flex
                    :justify-content :flex-end
