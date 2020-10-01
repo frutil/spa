@@ -22,9 +22,12 @@
     (fn [_form]
       (let [form @FORM_STATE]
         [:form
-         {:on-submit (fn [event]
+         {
+          :on-submit (fn [event]
+                       (-> event .stopPropagation)
+                       (-> event .preventDefault)
                        (on-submit)
-                       (-> event .preventDefault))}
+                       false)}
          (for [[index field] (map-indexed (fn [index field] [index field])
                                           (form-state/fields-in-order form))]
            ^{:key (get field :id)}

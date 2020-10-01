@@ -241,18 +241,19 @@
 ;;; dialogs
 
 
-(defonce ACTIVE_DIALOG (r/atom nil))
+(defonce ACTIVE_DIALOGS (r/atom {}))
 
 
 (defn DialogsContainer []
   [:div.DialogsContainer
-   (when-let [dialog @ACTIVE_DIALOG]
-     (conj dialog
-           #(reset! ACTIVE_DIALOG nil)))])
+   (for [[id dialog] @ACTIVE_DIALOGS]
+     ^{:key id}
+     [:div
+      (conj dialog #(swap! ACTIVE_DIALOGS dissoc id))])])
 
 
 (defn show-dialog [dialog]
-  (reset! ACTIVE_DIALOG dialog))
+  (swap! ACTIVE_DIALOGS assoc (random-uuid) dialog))
 
 
 (defn InfoDialog
